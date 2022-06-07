@@ -8,17 +8,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(config => config.UseInMemoryDatabase("InMemDb"));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(config => {
+                    config.Password.RequiredLength = 4;
+                    config.Password.RequireDigit = false;
+                    config.Password.RequireUppercase = false;
+                    config.Password.RequireNonAlphanumeric = false;
+                })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-builder.Services.AddControllersWithViews();
+builder.Services.ConfigureApplicationCookie(config => {
+    config.Cookie.Name = "Identity.Cookie";
+    config.LoginPath = "/Home/Login";
+});
 
-builder.Services.AddAuthentication("Cookie Authentication")
-                .AddCookie("Cookie Authentication", c => {
-                    c.LoginPath = "/Home/Authenticate";
-                    c.Cookie.Name = "Granny.Cookie";
-                });
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
